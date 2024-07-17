@@ -1,0 +1,5 @@
+# Ignore .env files
+**/*.env
+
+# Ignore Firebase admin SDK JSON file
+**/blogging-website-mern-firebase-adminsdk-d0ult-1362504656.json
