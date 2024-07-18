@@ -8,10 +8,13 @@ import LoadMoreDataBtn from "../components/load-more.component"
 import NoDataMessage from "../components/nodata.component";
 import { filterPaginationData } from "../common/filter-pagination-data";
 import axios from 'axios';
+import UserCard from "../components/usercard.component";
+
 
 const SearchPage = () => {
-    const { query } = useParams();
-    const [blogs, setBlog] = useState(null);
+    let { query } = useParams();
+    let [blogs, setBlog] = useState(null);
+    let [ users, setUsers] = useState(null);
 
     const SearchBlogs = async ({ page = 1, create_new_arr = false }) => {
         try {
@@ -34,13 +37,46 @@ const SearchPage = () => {
         }
     };
 
+
+    const fetchUsers = () =>{
+        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-users", { query })
+        .then(({ data: { users} }) => {
+            setUsers(users);
+        } )
+    }
+    
+
     useEffect(() => {
         resetState();
         SearchBlogs({ page: 1, create_new_arr: true });
+        fetchUsers();
     }, [query]);
 
     const resetState = () =>{
         setBlog(null);
+        setUsers(null);
+    }
+
+    const UserCardWrapper =() =>{
+        return (
+            <>
+            {
+                users == null ? <Loader />:
+                users.length ?
+                users.map((user, i) =>{
+                    return <AnimationWrapper key={i} transition={{ duration: 1, delay: i*0.08}}>
+                        <UserCard user={user} />
+                    </AnimationWrapper>
+                })
+                : <NoDataMessage  message="No User Found"/>
+
+
+            }
+            
+            
+            </>
+
+        )
     }
 
     return (
@@ -64,7 +100,15 @@ const SearchPage = () => {
                         <LoadMoreDataBtn state={blogs} fetchDataFun={SearchBlogs} />
                         
                     </>
+
+                    <UserCardWrapper />
                 </InPageNavigation>
+            </div>
+
+            <div className="min-w-[40%] lg:min-w-[350px] max-w-min-border-l border-grey pl-8 pt-3 max-md:hidden">
+                <h1 className="font-medium text-xl mb-8"> User related to Search<i className="fi fi-rr-user mt-2"></i></h1>
+                <UserCardWrapper />
+
             </div>
         </section>
     );
