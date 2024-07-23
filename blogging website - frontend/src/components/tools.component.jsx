@@ -9,30 +9,31 @@ import Marker from '@editorjs/marker';
 import Quote from '@editorjs/quote';
 import { uploadImage } from '../common/aws';
 
-const uploadImageByFile = (e) => {
-    return uploadImage(e).then(url => {
-        if (url) {
-            return {
-                success: 1,
-                file: { url }
-            };
-        }
-    });
-};
-
-const uploadImageByURL = (e) => {
-    let link = new Promise((resolve, reject) => {
-        try {
-            resolve(e);
-        } catch (err) {
-            reject(err);
-        }
-    })
-    return link.then(url => {
+// Function to handle image upload by file
+const uploadImageByFile = async (file) => {
+    console.log("Uploading image file:", file);
+    try {
+        const url = await uploadImage(file); // Ensure this function returns a URL
+        console.log("Image uploaded successfully, URL:", url);
         return {
             success: 1,
             file: { url }
         };
+    } catch (err) {
+        console.error("Image upload by file failed:", err);
+        return {
+            success: 0,
+            error: "Image upload failed"
+        };
+    }
+};
+
+// Function to handle image upload by URL
+const uploadImageByURL = (url) => {
+    console.log("Uploading image by URL:", url);
+    return Promise.resolve({
+        success: 1,
+        file: { url }
     });
 };
 
@@ -54,8 +55,14 @@ export const tools = {
         class: ImageTool,
         config: {
             uploader: {
-                uploadByURL: uploadImageByURL,
-                uploadByFile: uploadImageByFile
+                uploadByURL: (url) => {
+                    console.log("uploadByURL called with:", url);
+                    return uploadImageByURL(url);
+                },
+                uploadByFile: (file) => {
+                    console.log("uploadByFile called with:", file);
+                    return uploadImageByFile(file);
+                }
             }
         }
     },
