@@ -28,7 +28,7 @@ let {userAuth: { username }} = useContext(UserContext);
             <div className="flex gap-6 items-center">
             {
                 username == author_username ?
-                <Link to= {`/edior/${blog_id}`}className="underline hover:text-purple">Edit</Link>
+                <Link to= {`/editor/${blog_id}`}className="underline hover:text-purple">Edit</Link>
                 : ""
 
             }

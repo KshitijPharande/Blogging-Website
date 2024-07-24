@@ -34,25 +34,30 @@ const BlogPage = () => {
     } = blog;
 
     const fetchBlog = () => {
-        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
-            .then(({ data: { blog } }) => {
+    console.log('Fetching blog with ID:', blog_id);
+    axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
+        .then(({ data: { blog } }) => {
+            console.log('Received blog data:', blog);
+            setBlog(blog);
 
-                setBlog(blog);
-                console.log(blog.content)
-                axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs"
-                    , {tag: blog.tags[0], limit: 6, eliminate_blog: blog_id})
-                    .then(({data})=>{
-                        setSimilarBlogs(data.blogs);
-                        console.log(data.blogs);
-                    })
-               
-                setLoading(false);
-            })
-            .catch(err => {
-                console.log(err);
-                setLoading(false);
+            axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
+                tag: blog.tags[0],
+                limit: 6,
+                eliminate_blog: blog_id
+            }).then(({ data }) => {
+                console.log('Received similar blogs:', data.blogs);
+                setSimilarBlogs(data.blogs);
+            }).catch(err => {
+                console.error('Error fetching similar blogs:', err);
             });
-    };
+
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error('Error fetching blog:', err);
+            setLoading(false);
+        });
+};
 
     useEffect(() => {
         resetStates();

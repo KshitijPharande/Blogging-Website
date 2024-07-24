@@ -4,65 +4,60 @@ import { useContext } from "react";
 import { EditorContext } from "../pages/editor.pages";
 import Tag from "./tags.component";
 import { UserContext } from "../App";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios'; // Added Axios import
 
 const PublishForm = () => {
-    let CharacterLimit = 200;
-    let tagLimit = 10;
+    const CharacterLimit = 200;
+    const tagLimit = 10;
 
-    let { blog, blog: { banner, title, tags, des, content }, setEditorState, setBlog } = useContext(EditorContext);
-    let { userAuth: { access_token } } = useContext(UserContext); // Destructured access_token correctly
+    const { blog_id } = useParams();
 
-    let navigate = useNavigate();
+    const { blog, blog: { banner, title, tags, des, content }, setEditorState, setBlog } = useContext(EditorContext);
+    const { userAuth: { access_token } } = useContext(UserContext);
+
+    const navigate = useNavigate();
 
     const handleCloseEvent = () => {
         setEditorState("editor");
     };
 
     const handleBlogTitleChange = (e) => {
-        let input = e.target;
-        setBlog({ ...blog, title: input.value });
+        setBlog({ ...blog, title: e.target.value });
     };
 
     const handleBlogDesChange = (e) => {
-        let input = e.target;
-        setBlog({ ...blog, des: input.value });
+        setBlog({ ...blog, des: e.target.value });
     };
 
     const handleTitleKeyDown = (e) => {
-        if (e.keyCode === 13) { // or use e.key === 'Enter'
+        if (e.key === 'Enter') {
             e.preventDefault();
         }
     };
 
     const handleKeyDown = (e) => {
-        if (e.keyCode === 13 || e.keyCode === 188) {
+        if (e.key === 'Enter' || e.key === ',') {
             e.preventDefault();
+            const tag = e.target.value.trim();
 
-            let tag = e.target.value;
-
-            if (tags.length < tagLimit) {
-                if (!tags.includes(tag) && tag.length) {
-                    setBlog({ ...blog, tags: [...tags, tag] });
-                }
-            } else {
+            if (tags.length < tagLimit && tag && !tags.includes(tag)) {
+                setBlog({ ...blog, tags: [...tags, tag] });
+                e.target.value = "";
+            } else if (tags.length >= tagLimit) {
                 toast.error("You can only add 10 tags");
             }
-            e.target.value = "";
         }
     };
 
     const publishBlog = (e) => {
-        if (e.target.classList.contains("disable")) {
-            return;
-        }
+        if (e.target.classList.contains("disable")) return;
 
-        if (!title.length) {
+        if (!title) {
             toast.error("Please enter a title");
             return;
         }
-        if (!des.length || des.length > CharacterLimit) {
+        if (!des || des.length > CharacterLimit) {
             toast.error("Description cannot be blank and should be under 200 characters");
             return;
         }
@@ -71,36 +66,31 @@ const PublishForm = () => {
             return;
         }
 
-        let loadingToast = toast.loading("Publishing...");
-
+        const loadingToast = toast.loading("Publishing...");
         e.target.classList.add('disable');
 
-        let blogObj = {
+        const blogObj = {
             title, banner, des, content, tags, draft: false
         };
 
-        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
+        axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/create-blog`, { ...blogObj, id: blog_id }, {
             headers: {
                 'Authorization': `Bearer ${access_token}`
             }
         })
-            .then(() => {
-                e.target.classList.remove('disable');
-
-                toast.dismiss(loadingToast); // Corrected typo in toast.dismiss
-
-                toast.success("Blog Published Successfully 👍");
-
-                setTimeout(() => {
-                    navigate("/"); // Ensure navigate("/") is correctly imported and used
-                }, 500);
-            })
-            .catch(({ response }) => {
-                e.target.classList.remove('disable');
-                toast.dismiss(loadingToast);
-
-                toast.error(response.data.error);
-            });
+        .then(() => {
+            e.target.classList.remove('disable');
+            toast.dismiss(loadingToast);
+            toast.success("Blog Published Successfully 👍");
+            setTimeout(() => {
+                navigate("/");
+            }, 500);
+        })
+        .catch(({ response }) => {
+            e.target.classList.remove('disable');
+            toast.dismiss(loadingToast);
+            toast.error(response.data.error);
+        });
     };
 
     return (
@@ -116,15 +106,13 @@ const PublishForm = () => {
 
                 <div className="max-w-[550px] center">
                     <p className="text-dark-grey mb-1">Preview</p>
-
                     <div className="w-full aspect-video rounded-lg overflow-hidden bg-grey mt-4">
                         <img src={banner} alt="Blog Banner" />
                     </div>
-
                     <h1 className="text-4xl font-medium mt-2 leading-tight line-clamp-2">{title}</h1>
-
                     <p className="font-gelasio line-clamp-2 text-xl leading-7 mt-4">{des}</p>
                 </div>
+
                 <div className="border-grey lg:border-1 lg:pl-8">
                     <p className="text-dark-grey mb-2 mt-9">Blog Title</p>
                     <input
@@ -143,11 +131,9 @@ const PublishForm = () => {
                         onChange={handleBlogDesChange}
                         onKeyDown={handleTitleKeyDown}
                     />
-
                     <p className="mt-1 text-dark-grey text-sm text-right">{CharacterLimit - des.length} Characters Left</p>
 
                     <p className="text-dark-grey mb-2 mt-9">Topics - (Helps in Searching and Ranking Your Blog Post)</p>
-
                     <div className="relative input-box pl-2 py-2 pb-4">
                         <input
                             type="text"
@@ -159,7 +145,6 @@ const PublishForm = () => {
                             <Tag tag={tag} tagIndex={i} key={i} />
                         ))}
                     </div>
-
                     <p className="mt-1 mb-4 text-dark-grey text-right">{tagLimit - tags.length} Tags Left</p>
 
                     <button className="btn-dark px-8" onClick={publishBlog}>

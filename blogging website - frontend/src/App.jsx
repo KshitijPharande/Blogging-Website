@@ -14,7 +14,7 @@ export const UserContext = createContext({});
 
 const App = () => {
     // Correct destructuring of useState
-    const [userAuth, setUserAuth] = useState({});
+    let [userAuth, setUserAuth] = useState({});
 
     useEffect(() => {
         let userInSession = lookInSession("user");
@@ -24,7 +24,8 @@ const App = () => {
     return (
         <UserContext.Provider value={{ userAuth, setUserAuth }}>
             <Routes>
-                <Route path="/editor" element={<Editor/>} />
+                <Route path="/editor" element={<Editor />} />
+                <Route path="/editor/:blog_id" element={<Editor />} />
                 <Route path="/" element={<Navbar />}>
                 <Route path="login" element={<UserAuthForm />} />  
                     <Route index element={<HomePage/>} />
