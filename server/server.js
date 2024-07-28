@@ -465,15 +465,33 @@ server.post("/like-blog", verifyJWT, (req, res) => {
                     res.status(200).json({ liked_by_user: true });
                 });
             } else {
-                res.status(200).json({ liked_by_user: false });
+                Notification.findOneAndDelete({ user: user_id, blog: _id, type: "like" })
+                    .then(data => {
+                        res.status(200).json({ liked_by_user: false });
+                    })
+                    .catch(err => {
+                        return res.status(500).json({ error: err.message });
+                    });
             }
         })
         .catch(err => {
-            console.error(err);
-            res.status(500).json({ error: "Internal Server Error" });
+            return res.status(500).json({ error: err.message });
         });
 });
 
+
+server.post("/isliked-by-user", verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { _id } = req.body;
+
+    Notification.exists({ user: user_id, type: "like", blog: _id })
+    .then(result => {
+        return res.status(200).json({ result });
+    })
+    .catch(err => {
+        return res.status(500).json({ error: err.message });
+    });
+});
 
 
 server.listen(PORT, () => {
