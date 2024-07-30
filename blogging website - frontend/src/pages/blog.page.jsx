@@ -7,7 +7,7 @@ import { getDay } from "../common/date";
 import BlogIntereaction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
-import CommentsContainer from "../components/comments.component";
+import CommentsContainer, { fetchComments } from "../components/comments.component";
 export const blogStructure = {
     title: '',
     des: '',
@@ -29,7 +29,7 @@ const BlogPage = () => {
     const [ commentsWrapper, setCommentsWrapper] = useState(false);
     const [ totaParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0);
 
-    const { 
+    let { 
         title, 
         content, 
         banner, 
@@ -40,9 +40,10 @@ const BlogPage = () => {
     const fetchBlog = () => {
     console.log('Fetching blog with ID:', blog_id);
     axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
-        .then(({ data: { blog } }) => {
-            console.log('Received blog data:', blog);
-            setBlog(blog);
+        .then(async ({ data: { blog } }) => {
+          blog.comments = await fetchComments({blog_id: blog._id, setParentCommentCountFun: setTotalParentCommentsLoaded }) 
+            setBlog(blog)
+            console.log(blog);
 
             axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
                 tag: blog.tags[0],
@@ -75,7 +76,7 @@ const BlogPage = () => {
         setSimilarBlogs(null);
         setLoading(true);
         setLikedByUser(false);
-        // setCommentsWrapper(false);
+        setCommentsWrapper(false);
         setTotalParentCommentsLoaded(0);
     }
 

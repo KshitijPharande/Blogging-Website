@@ -6,7 +6,7 @@ import { Toaster, toast } from "react-hot-toast"
 import axios from "axios"
 const BlogIntereaction = () =>{
     let {blog, blog: {_id ,title, blog_id, activity, activity: {total_likes, total_comments},
-author: {personal_info: {username: author_username }}}, setBlog, islikedByUser, setLikedByUser, commentsWrapper, setCommentsWrapper  } = useContext(BlogContext);
+author: {personal_info: {username: author_username }} }, setBlog, islikedByUser, setLikedByUser, commentsWrapper, setCommentsWrapper  } = useContext(BlogContext);
 
 
 let {userAuth: { username, access_token }} = useContext(UserContext);

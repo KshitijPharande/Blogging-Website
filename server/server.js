@@ -512,7 +512,7 @@ server.post("/add-comment", verifyJWT, (req, res) => {
         Blog.findOneAndUpdate({_id}, { $push: {"comments": commentFile._id },
             $inc: { "activity.total_comments": 1 }, "activity.total_parent_comments": 1})
             .then(blog =>{
-                console.log("Nw comment created")
+                console.log("New comment created")
             })
 
             let notificationObj ={
@@ -525,7 +525,31 @@ server.post("/add-comment", verifyJWT, (req, res) => {
             new Notification(notificationObj).save().then(notification => console.log("new noti created"))
             return res.status(200).json({ comment, commentedAt, _id: commentFile._id, user_id, children });
     })
+    
 });
+
+server.post("/get-blog-comments",(req, res ) =>{
+    let { blog_id, skip } = req.body;
+    let maxLimit = 5;
+
+    Comment.find({ blog_id, isReply: false })
+    .populate("commented_by", "personal_info.username personal_info.fullname personal_info.profile_img")
+    .skip(skip)
+    .limit(maxLimit)
+    .sort({
+        'commentedAt': -1
+    })
+    .then(comment =>{
+        return res.status(200).json(comment);
+    })
+    .catch(err =>{
+        console.log(err.message)
+        return res.status(500).json({error: err.message})
+    })
+
+})
+
+
 server.listen(PORT, () => {
     console.log('listening on port >' + PORT);
 });
