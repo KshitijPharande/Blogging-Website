@@ -29,10 +29,14 @@ export const fetchComments = async ({skip = 0, blog_id, setParentCommentCountFun
 }
 
 const CommentsContainer = () => {
-    let { blog: {title, comments: {results: commentsArr}}, commentsWrapper, setCommentsWrapper } = useContext(BlogContext);
+    let {blog, blog: { _id, title, comments: {results: commentsArr}, activity: {total_parent_comments}}, commentsWrapper, setCommentsWrapper, totaParentCommentsLoaded, setTotalParentCommentsLoaded,setBlog } = useContext(BlogContext);
     console.log(commentsArr)
 
+    const loadMoreComments = async() =>{
+        let newCommentArr = await fetchComments({skip: totaParentCommentsLoaded, blog_id: _id, setParentCommentCountFun: setTotalParentCommentsLoaded, comment_array: commentsArr })
 
+        setBlog({ ...blog, comments: newCommentArr })
+    }
 
     return (
         <div className={
@@ -62,6 +66,15 @@ const CommentsContainer = () => {
                         <CommentCard index={i} leftVal={comment.childrenLevel *4} commentData={comment}/>
                     </AnimationWrapper>
                 }) : <NoDataMessage message="No comments" />
+            }
+            {
+                total_parent_comments > totaParentCommentsLoaded ?
+                <button
+                onClick={loadMoreComments}
+                className="text-dark-grey p-2 px-3 hover:bg-grey/30 rounded-md flex items-center gap-2">
+                    Load More
+                </button>
+                : ""
             }
         </div>
     );
