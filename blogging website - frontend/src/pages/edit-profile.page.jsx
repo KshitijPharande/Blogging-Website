@@ -7,9 +7,10 @@ import Loader from "../components/loader.component";
 import { Toaster, toast } from "react-hot-toast";
 import InputBox from "../components/input.component";
 import { uploadImage } from "../common/aws";
+import { storeInSession } from "../common/session";
 
 const EditProfile = () => {
-    let { userAuth, userAuth: { access_token } } = useContext(UserContext);
+    let { userAuth, userAuth: { access_token }, setUserAuth } = useContext(UserContext);
 
     let bioLimit = 150;
 
@@ -55,7 +56,32 @@ const EditProfile = () => {
 
             uploadImage(updatedProfileImg)
             .then(url =>{
-                console.log(url)
+                if(url){
+                axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/update-profile-img", { url },{
+                    headers: {
+                        'Authorization': `Bearer ${access_token}`
+                    }
+                })
+                .then(({ data }) =>{
+                    let newUserAuth = { ...userAuth, profile_img: data.profile_img }
+
+                    storeInSession("user", JSON.stringify(newUserAuth))
+                    setUserAuth(newUserAuth)
+
+
+                    setUpdatedProfileImg(null)
+
+                    toast.dismiss(loadingToast)
+                    e.target.removeAttribute("disabled");
+                    toast.success("Uploaded👍")
+                })
+                .catch(({response}) =>{
+                    toast.dismiss(loadingToast)
+                    e.target.removeAttribute("disabled");
+                    toast.error(response.data.error)
+                })
+            }
+            
             })
             .catch(err =>{
                 console.log(err)
