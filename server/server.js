@@ -590,7 +590,7 @@ server.post("/get-replies", (req, res)=>{
     Comment.findOne({_id})
     .populate({
         path: "children",
-        option: {
+        options: {
             limit: (maxLimit),
             skip: skip,
             sort: { 'commentedAt': -1 }
@@ -605,6 +605,7 @@ server.post("/get-replies", (req, res)=>{
     })
     .select("children")
     .then(doc => {
+        console.log(doc);
         return res.status(200).json({replies: doc.children})
     })
     .catch(err =>{
