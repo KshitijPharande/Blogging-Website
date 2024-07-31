@@ -215,7 +215,7 @@ server.post("/google-auth", async (req, res) => {
     });
 });
 
-let maxLimit= 5;
+ 
 
 server.post('/latest-blogs', (req, res) =>{
 
