@@ -15,6 +15,7 @@ const EditProfile = () => {
     let bioLimit = 150;
 
     let profileImgEle = useRef()
+    let editProfileForm = useRef();
 
     const [profile, setProfile] = useState(profileDataStructure);
     const [loading, setLoading] = useState(true);
@@ -90,13 +91,60 @@ const EditProfile = () => {
         }
     }
 
-
+    const handleSubmit = (e) => {
+        e.preventDefault();
+    
+        let form = new FormData(editProfileForm.current);
+        let formData = {};
+    
+        for (let [key, value] of form.entries()) {
+            formData[key] = value;
+        }
+    
+        let { username, bio, youtube, facebook, twitter, github, instagram, website } = formData;
+    
+        if (username.length < 3) {
+            return toast.error("Username should be at least 3 letters long");
+        }
+        if (bio.length > bioLimit) {
+            return toast.error("Bio should be less than 150 characters");
+        }
+    
+        let loadingToast = toast.loading("Updating...");
+        e.target.setAttribute("disabled", "true");
+    
+        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/update-profile", {
+            username,
+            bio,
+            social_links: { youtube, facebook, twitter, github, instagram, website }
+        }, {
+            headers: {
+                'Authorization': `Bearer ${access_token}`
+            }
+        })
+        .then(({ data }) => {
+            if (userAuth.userAuth !== data.username) {
+                let newUserAuth = { ...userAuth, username: data.username };
+                storeInSession("user", newUserAuth);
+                setUserAuth(newUserAuth);
+            }
+            toast.dismiss(loadingToast);
+            e.target.removeAttribute("disabled");
+            toast.success("Profile Updated Successfully");
+        })
+        .catch((error) => {
+            toast.dismiss(loadingToast);
+            e.target.removeAttribute("disabled");
+            toast.error(error.response.data.error);
+        });
+    };
+    
 
 
     return (
         <AnimationWrapper>
             {loading ? <Loader /> :
-                <form>
+                <form ref={editProfileForm}>
                     <Toaster />
                     <h1 className="max-md:hidden">Edit Profile</h1>
                     <div className="flex flex-col lg:flex-row items-start py-10 gap-8 lg:gap-10">
@@ -132,7 +180,7 @@ const EditProfile = () => {
                                 ))
                                 }
                             </div>
-                            <button className="btn-dark w-auto px-10" type="submit">Update</button>
+                            <button onClick={handleSubmit} className="btn-dark w-auto px-10" type="submit">Update</button>
                         </div>
                     </div>
                 </form>

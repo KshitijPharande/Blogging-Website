@@ -402,8 +402,53 @@ server.post('/update-profile-img', verifyJWT, (req, res)=>{
 })
 
 
+server.post('/update-profile', verifyJWT, (req, res) =>{
+    let { username, bio, social_links } = req.body
+    let bioLimit = 150;
+    if(username.length < 3){
+        return res.status(403).json({ error: "Username should be at least 3 letters long" })
+    }
+    if(bio.length > bioLimit){
+        return res.status(403).json({ error: `Bio should be less than ${bioLimit}`})
+    }
+    let socialLinksArr = Object.keys(social_links);
+
+    try{
+
+        for(let i =0; i<socialLinksArr.length; i++){
+            if(social_links[socialLinksArr[i]].length){
+                let hostname = new URL(social_links[socialLinksArr[i]]).hostname
+
+                if(!hostname.includes(`${socialLinksArr[i]}.com`)  && socialLinksArr[i] != 'website'){
+                    return res.status(403).json({ error: `Invalid ${socialLinksArr[i]} link`})
+                }
+
+            }
+        }
 
 
+
+    }catch (err){
+        return res.status(500).json({ error: "you must provide full social links including https://" })
+    }
+    let updateObj = {
+        "personal_info.username": username,
+        "personal_info.bio": bio,
+        social_links
+    }
+    User.findOneAndUpdate({ _id: req.user }, updateObj,{
+        runValidators: true
+    })
+    .then(() =>{
+        return res.status(200).json({username})
+    })
+    .catch(err =>{
+       if(err.code == 11000){
+        return res.status(403).json({ error: "Username already exists" })
+       }
+       return res.status(500).json({ error: err.message })
+    })
+})
 
 
 
