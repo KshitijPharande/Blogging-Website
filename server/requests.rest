@@ -1,20 +1,2 @@
-
-
-#eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE5OTk5ODUwMjJmNzg2YjU5OTA5NyIsImlhdCI6MTcyMjQ1NjUwOH0.heGVWkc6y6_ex9awfigYskASD4nG6AtQHy_Ya5F7AAA
-
-POST  http://localhost:3000/change-password
-Content-Type: application/json
-Authorization:  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE5OTk5ODUwMjJmNzg2YjU5OTA5NyIsImlhdCI6MTcyMjQ1NjUwOH0.heGVWkc6y6_ex9awfigYskASD4nG6AtQHy_Ya5F7AAA
-
-{
-    "currentPassword": "Password1D",
-    "newPassword": "Password1B"
-}
-
-#  POST  http://localhost:3000/signin
-#  Content-Type: application/json
-
-#  {
-#     "email": "mangal@gmail.com",
-#     "password": "Passssword1B"
-#  }
+GET http://localhost:3000/new-notification
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE5OTk5ODUwMjJmNzg2YjU5OTA5NyIsImlhdCI6MTcyMjU4MTA0Nn0.OUTi-RB5hOFXS4DylSYHOgur2iP-b7RA8l3SwiFZ65w
