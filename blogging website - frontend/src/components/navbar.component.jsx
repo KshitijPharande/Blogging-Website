@@ -50,7 +50,7 @@ const Navbar = () => {
             setUserNavPanel(false);
         }, 200);
     }
-    console.log(new_notification_available)
+   
 
     return (
       <>
