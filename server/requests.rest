@@ -1,2 +1,12 @@
-GET http://localhost:3000/new-notification
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE5OTk5ODUwMjJmNzg2YjU5OTA5NyIsImlhdCI6MTcyMjU4MTA0Nn0.OUTi-RB5hOFXS4DylSYHOgur2iP-b7RA8l3SwiFZ65w
+
+#eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE5OTk5ODUwMjJmNzg2YjU5OTA5NyIsImlhdCI6MTcyMjY2NjAzMn0.L-0oY4K4elAPKx-wFEv7n--A5Bqp0t_zSdhNWOYbyjg
+
+POST http://localhost:3000/user-written-blogs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE5OTk5ODUwMjJmNzg2YjU5OTA5NyIsImlhdCI6MTcyMjY2NjAzMn0.L-0oY4K4elAPKx-wFEv7n--A5Bqp0t_zSdhNWOYbyjg
+Content-Type: application/json
+
+{
+    "page" : 1,
+    "draft" : true
+
+}
