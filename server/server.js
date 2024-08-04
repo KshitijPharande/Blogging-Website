@@ -891,7 +891,30 @@ server.post("/user-written-blogs-count", verifyJWT, (req, res)=>{
 
 })
 
+server.post("/delete-blogs", verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { blog_id } = req.body;
 
+    Blog.findOneAndDelete({ blog_id })
+        .then(blog => {
+            Notification.deleteMany({ blog: blog_id }).then(data => console.log('notifications deleted'));
+            Comment.deleteMany({ blog_id: blog_id }).then(data => console.log('comments deleted'));
+            User.findOneAndUpdate(
+                { _id: user_id },
+                { $pull: { blog: blog._id }, $inc: { "account_info.total_posts": -1 } }
+            )
+            .then(user => {
+                console.log('blog deleted');
+                return res.status(200).json({ status: 'done' });
+            })
+            .catch(err => {
+                return res.status(500).json({ error: err.message });
+            });
+        })
+        .catch(err => {
+            return res.status(500).json({ error: err.message });
+        });
+});
 
 
 
