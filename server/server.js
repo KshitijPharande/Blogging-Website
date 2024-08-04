@@ -895,28 +895,46 @@ server.post("/delete-blogs", verifyJWT, (req, res) => {
     let user_id = req.user;
     let { blog_id } = req.body;
 
+    console.log('Delete request received for blog:', blog_id);  // Log the request
+
     Blog.findOneAndDelete({ blog_id })
         .then(blog => {
-            Notification.deleteMany({ blog: blog_id }).then(data => console.log('notifications deleted'));
-            Comment.deleteMany({ blog_id: blog_id }).then(data => console.log('comments deleted'));
+            if (!blog) {
+                console.log('Blog not found:', blog_id);  // Log if the blog is not found
+                return res.status(404).json({ error: 'Blog not found' });
+            }
+
+            console.log('Blog found and deleted:', blog_id);  // Log if blog deletion is successful
+
+            // Attempt to delete notifications
+            Notification.deleteMany({ blog: blog_id })
+                .then(() => console.log('Notifications deleted'))
+                .catch(err => console.log('Error deleting notifications:', err.message));
+
+            // Attempt to delete comments
+            Comment.deleteMany({ blog_id: blog_id })
+                .then(() => console.log('Comments deleted'))
+                .catch(err => console.log('Error deleting comments:', err.message));
+
+            // Attempt to update user
             User.findOneAndUpdate(
                 { _id: user_id },
                 { $pull: { blog: blog._id }, $inc: { "account_info.total_posts": -1 } }
             )
-            .then(user => {
-                console.log('blog deleted');
+            .then(() => {
+                console.log('User updated successfully');  // Log successful user update
                 return res.status(200).json({ status: 'done' });
             })
             .catch(err => {
+                console.log('Error updating user:', err.message);  // Log error updating user
                 return res.status(500).json({ error: err.message });
             });
         })
         .catch(err => {
+            console.log('Error deleting blog:', err.message);  // Log error deleting blog
             return res.status(500).json({ error: err.message });
         });
 });
-
-
 
 
 server.listen(PORT, () => {

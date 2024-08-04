@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
-import { useState } from "react";
-
+import { useContext, useState } from "react";
+import { UserContext } from "../App";
+import axios from "axios";
 const BlogStats = ({ stats }) =>{
 
     return (
@@ -26,6 +27,7 @@ const BlogStats = ({ stats }) =>{
  export const ManagePublishedBlogsCard = ({ blog }) =>{
 
     let { banner, blog_id, title, publishedAt, activity } = blog;
+    let { userAuth: { access_token } } = useContext(UserContext)
 
     let [ showStat, setShowStat] = useState(false);
     console.log(showStat)
@@ -41,7 +43,7 @@ const BlogStats = ({ stats }) =>{
                     </div>
                     <div className="flex gap-6 mt-3">
                         <Link to={`/editor/${blog_id}`} className="pr-4 py-2 underline">Edit</Link>
-                        <button className="pr-4 py-2 underline text-red">Delete</button>
+                        <button className="pr-4 py-2 underline text-red"onClick={(e) =>deleteBlog(blog, access_token, e.target)}>Delete</button>
 
                         <button className="lg:hidden pr-4 py-2 underline" onClick={() => setShowStat(preVal => !preVal)}> Stats </button>
 
@@ -59,9 +61,12 @@ const BlogStats = ({ stats }) =>{
     )
 }
 
-export const ManageDraftBlogPost = ({ blog, index }) =>{
+export const ManageDraftBlogPost = ({ blog, }) =>{
 
-    let {title, des, blog_id} = blog;
+    let {title, des, blog_id,  index} = blog;
+    let { userAuth: { access_token } } = useContext(UserContext)
+
+    index++
 
     return(
        <div className="flex gap-5 lg:gap-10 pb-6 border-b mb-6 border-grey">
@@ -72,7 +77,7 @@ export const ManageDraftBlogPost = ({ blog, index }) =>{
            <p className="line-clamp-2 font-gelasio">{des.length ? des : "No Description"}</p>
            <div className="flex gap-6 mt-3">
             <Link to={`/editor/${blog_id}`} className="pr-4 py-4 underline">Edit</Link>
-            <button className="pr-4 py-2 underline text-red">Delete</button>
+            <button className="pr-4 py-2 underline text-red"onClick={(e) =>deleteBlog(blog, access_token, e.target)}>Delete</button>
            </div>
         </div>
 
@@ -81,3 +86,37 @@ export const ManageDraftBlogPost = ({ blog, index }) =>{
     )
 
 }
+
+const deleteBlog = (blog, access_token, target) => {
+    let { index, blog_id, setStateFunc } = blog;
+    target.setAttribute("disabled", true);
+
+    console.log('Deleting blog:', blog_id);  // Add log here
+
+    axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/delete-blogs", {
+        blog_id: blog_id
+    }, {
+        headers: {
+            'Authorization': `Bearer ${access_token}`
+        }
+    })
+    .then(({ data }) => {
+        console.log('Blog deleted successfully:', data);  // Add log here
+        target.removeAttribute("disabled");
+        setStateFunc(preVal => {
+            let { deletedDocCount, totalDocs, results } = preVal;
+
+            results.splice(index, 1);
+            if (!deletedDocCount) {
+                deletedDocCount = 0;
+            }
+            if (!results.length && totalDocs - 1 > 0) {
+                return null;
+            }
+            return { ...preVal, totalDocs: totalDocs - 1, deletedDocCount: deletedDocCount + 1 };
+        });
+    })
+    .catch(err => {
+        console.log('Error deleting blog:', err);  // Add log here
+    });
+};
