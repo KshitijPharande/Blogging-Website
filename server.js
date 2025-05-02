@@ -1,15 +1,19 @@
-import express from 'express'; // Removed unnecessary import of `json`
+import express from 'express';
 import mongoose from 'mongoose';
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
 import cors from 'cors';
-import jwt from 'jsonwebtoken'; // Changed to correct import of `jsonwebtoken`
-import admin from "firebase-admin";
-import serviceAccountKey from "./blogging-website-mern-firebase-adminsdk-d0ult-1362504656.json" assert { type: "json" };
-import { getAuth } from "firebase-admin/auth";
-import aws from "aws-sdk";
+import jwt from 'jsonwebtoken';
+import admin from 'firebase-admin';
+import fs from 'fs';
+import { getAuth } from 'firebase-admin/auth';
+import aws from 'aws-sdk';
 
+// Load Firebase service account key from JSON file
+const serviceAccountKey = JSON.parse(
+  fs.readFileSync('./blogging-website-mern-firebase-adminsdk-d0ult-1362504656.json', 'utf8')
+);
 // Schema
 import User from './Schema/User.js';
 import Blog from './Schema/Blog.js';
